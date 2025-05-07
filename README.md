@@ -1,5 +1,5 @@
 # README
 
-this is a java demo rpogram.
+this is a java demo program.
 
 McG
