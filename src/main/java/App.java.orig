@@ -19,16 +19,16 @@ public class App implements KeyListener {
     public static Properties config = new Properties();
     private static final long FPS = 60;
     private JFrame window;
-
+    
     private boolean[] keys = new boolean[1024];
-
+    
     private int debug = 0;
     private RunningMode mode=RunningMode.PROD;
 
     private boolean exit = false;
     private boolean pause = false;
     private long time = System.currentTimeMillis();
-
+    
     private List<Entity> entities = new ArrayList<>();
 
     public App() {
@@ -121,14 +121,14 @@ public class App implements KeyListener {
     }
 
     private void loop() {
-        initScene();
+    	initScene();
         do {
             if (!pause) {
                 update();
                 render();
             }
             try {
-                Thread.sleep(1000/(FPS*2));
+                Thread.sleep(1000/FPS);
             } catch(Exception e) {
                 // something goes wrong in the matrix
             }
@@ -136,31 +136,31 @@ public class App implements KeyListener {
     }
 
 
-    private void initScene() {
-        entities.add(new Entity("player")
-                     .setPosition(320,120)
-                     .setSize(16,16)
-                     .setEdgeColor(Color.RED)
-                     .setFillColor(Color.RED.darker())
-                    );
-    }
+	private void initScene(){
+		entities.add(new Entity("player")
+			.setPosition(320,120)
+			.setSize(16,16)
+			.setEdgeColor(Color.RED)
+			.setFillColor(Color.RED.darker())
+		);
+	}
 
     private void update() {
         time+=1000/FPS;
-
-        Entity player = getEntity("player");
-        int step = 1;
-        if(isKeyPressed(KeyEvent.VK_UP)) {
-            player.setPosition(player.getPosition().x,player.getPosition().y-step);
+        
+        Entity player = getEntity("player"); 
+        int step = 4;
+        if(isKeyPressed(KeyEvent.VK_UP)){
+        	player.setPosition(player.getPosition().x,player.getPosition().y-step);
         }
-        if(isKeyPressed(KeyEvent.VK_DOWN)) {
-            player.setPosition(player.getPosition().x,player.getPosition().y+step);
+        if(isKeyPressed(KeyEvent.VK_DOWN)){
+        	player.setPosition(player.getPosition().x,player.getPosition().y+step);
         }
-        if(isKeyPressed(KeyEvent.VK_LEFT)) {
-            player.setPosition(player.getPosition().x-step,player.getPosition().y);
+        if(isKeyPressed(KeyEvent.VK_LEFT)){
+        	player.setPosition(player.getPosition().x-step,player.getPosition().y);
         }
-        if(isKeyPressed(KeyEvent.VK_RIGHT)) {
-            player.setPosition(player.getPosition().x+step,player.getPosition().y);
+        if(isKeyPressed(KeyEvent.VK_RIGHT)){
+        	player.setPosition(player.getPosition().x+step,player.getPosition().y);
         }
     }
 
@@ -171,28 +171,28 @@ public class App implements KeyListener {
         g.fillRect(0,0,window.getWidth(),window.getHeight());
         g.setColor(Color.WHITE);
         g.drawString("time is flying %d".formatted(time),320,100);
-        for(Entity e:entities) {
-            drawEntity(g,e);
+        for(Entity e:entities){
+        	drawEntity(g,e);
         }
         g.dispose();
         bs.show();
     }
 
 
-    private void drawEntity(Graphics2D g, Entity e) {
-        if (e.getFillColor()!=null) {
-            g.setColor(e.getFillColor());
-            g.fillRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
-        }
-        if (e.getEdgeColor()!=null) {
-            g.setColor(e.getEdgeColor());
-            g.drawRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
-        }
-    }
+	private void drawEntity(Graphics2D g, Entity e){
+		if (e.getFillColor()!=null){
+			g.setColor(e.getFillColor());
+			g.fillRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
+		}
+		if (e.getEdgeColor()!=null){
+			g.setColor(e.getEdgeColor());
+			g.drawRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
+		}
+	}
 
-    public Entity getEntity(String name) {
-        return entities.stream().filter(e->e.getName().equals(name)).findFirst().get();
-    }
+	public Entity getEntity(String name){
+		return entities.stream().filter(e->e.getName().equals(name)).findFirst().get();
+	}
     private void dispose() {
         if (window != null) {
             window.dispose();
@@ -206,10 +206,10 @@ public class App implements KeyListener {
 
     public void keyTyped(KeyEvent e) {}
     public void keyPressed(KeyEvent e) {
-        keys[e.getKeyCode()]=true;
+    	keys[e.getKeyCode()]=true;
     }
     public void keyReleased(KeyEvent e) {
-        keys[e.getKeyCode()]=false;
+    	keys[e.getKeyCode()]=false;
         switch(e.getKeyCode()) {
         case KeyEvent.VK_ESCAPE -> {
                 exit=true;
@@ -223,7 +223,7 @@ public class App implements KeyListener {
         }
     }
 
-    public boolean isKeyPressed(int keyCode) {
-        return this.keys[keyCode];
-    }
+	public boolean isKeyPressed(int keyCode){
+		return this.keys[keyCode];
+	}
 }
