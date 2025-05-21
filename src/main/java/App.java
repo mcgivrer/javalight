@@ -170,7 +170,22 @@ public class App implements KeyListener {
                     .setVelocity(-0.2 + rand.nextDouble(0.4), -0.2 + rand.nextDouble(0.4))
             );
         }
+        for (int i = 0; i < 20; i++) {
+            addLight(new Light("light_" + i)
+                    .setRadius(40 * Math.random())
+                    .setIntensity(0.3 + (Math.random() * 0.7))
+                    .setVibration(3.0 * Math.random())
+                    .setFillColor(Color.WHITE)
+                    .setPhysicType(PhysicType.DYNAMIC)
+                    .setPosition(renderBuffer.getWidth() * Math.random(), renderBuffer.getHeight() * Math.random())
+                    .setVelocity(-0.2 + rand.nextDouble(0.4), -0.2 + rand.nextDouble(0.4)));
+        }
+
         setCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
+    }
+
+    private void addLight(Light light) {
+        lights.add(light);
     }
 
     public void setCamera(Camera cam) {
@@ -200,6 +215,11 @@ public class App implements KeyListener {
         }
 
         entities.stream().filter(Entity::isActive).forEach(e -> {
+            updateEntity(e, elapsed);
+            e.update(elapsed);
+            constrainsEntity(world, e);
+        });
+        lights.stream().filter(Entity::isActive).forEach(e -> {
             updateEntity(e, elapsed);
             e.update(elapsed);
             constrainsEntity(world, e);
@@ -279,7 +299,13 @@ public class App implements KeyListener {
         lights.stream()
                 .filter(Entity::isActive)
                 .forEach(l -> {
-                    drawLight(g, (Light) l);
+                    if (currentCamera != null) {
+                        g.translate(-currentCamera.position.getX(), -currentCamera.position.getY());
+                    }
+                    l.draw(g);
+                    if (currentCamera != null) {
+                        g.translate(currentCamera.position.getX(), currentCamera.position.getY());
+                    }
                 });
 
 
