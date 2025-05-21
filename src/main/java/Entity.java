@@ -14,6 +14,7 @@ public class Entity {
     protected double height = 16;
 
     protected PhysicType physicType = PhysicType.DYNAMIC;
+    protected Material material = Material.DEFAULT;
     protected boolean active = true;
 
     private Color edgeColor = Color.WHITE;
@@ -68,6 +69,11 @@ public class Entity {
         return (T) this;
     }
 
+    public <T extends Entity> T setMaterial(Material m) {
+        this.material = m;
+        return (T) this;
+    }
+
     public String getName() {
         return this.name;
     }
@@ -110,5 +116,9 @@ public class Entity {
 
     public void update(long elapsed) {
 
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 }

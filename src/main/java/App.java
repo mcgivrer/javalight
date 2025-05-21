@@ -155,7 +155,8 @@ public class App implements KeyListener {
                 .setPosition(20, 20)
                 .setSize(16, 16)
                 .setEdgeColor(Color.RED)
-                .setFillColor(Color.RED.darker());
+                .setFillColor(Color.RED.darker())
+                .setMaterial(new Material("body", 0.92, 0.98, 1.0));
         addEntity(player);
         setCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
     }
@@ -203,24 +204,36 @@ public class App implements KeyListener {
                     (e.getPosition().getY() + ((e.getVelocity().getY() + (world.getGravity() * 0.01)) * elapsed)));
             //reduce velocity
             e.setVelocity(
-                    (e.getVelocity().getX() * 0.90),
-                    (e.getVelocity().getY() * 0.90));
+                    (e.getVelocity().getX() * e.getMaterial().friction()),
+                    (e.getVelocity().getY() * e.getMaterial().friction()));
         }
     }
 
     public void containsEntity(World w, Entity e) {
         if (e.getPosition().getX() < w.getPosition().getX()) {
             e.setPosition(w.getPosition().getX(), e.getPosition().getY());
+            e.setVelocity(
+                    -(e.getVelocity().getX() * e.getMaterial().elasticity()),
+                    e.getVelocity().getY());
         }
         if (e.getPosition().getY() < w.getPosition().getY()) {
             e.setPosition(e.getPosition().getX(), w.getPosition().getY());
+            e.setVelocity(
+                    e.getVelocity().getX(),
+                    -e.getVelocity().getY() * e.getMaterial().elasticity());
         }
 
         if (e.getPosition().getX() + e.getWidth() > w.getPosition().getX() + w.getWidth()) {
             e.setPosition(w.getPosition().getX() + w.getWidth() - e.getWidth(), e.getPosition().getY());
+            e.setVelocity(
+                    -(e.getVelocity().getX() * e.getMaterial().elasticity()),
+                    e.getVelocity().getY());
         }
         if (e.getPosition().getY() + e.getHeight() > w.getPosition().getY() + w.getHeight()) {
             e.setPosition(e.getPosition().getX(), w.getPosition().getY() + w.getHeight() - e.getHeight());
+            e.setVelocity(
+                    e.getVelocity().getX(),
+                    -e.getVelocity().getY() * e.getMaterial().elasticity());
         }
 
     }
