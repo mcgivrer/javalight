@@ -29,6 +29,8 @@ public class App implements KeyListener {
     private boolean pause = false;
     private long time = System.currentTimeMillis();
 
+    private World world = new World("earth", 640, 400);
+
     private List<Entity> entities = new ArrayList<>();
 
     public App() {
@@ -59,7 +61,7 @@ public class App implements KeyListener {
 
     private void prepareWindow() {
         window = new JFrame(messages.getString("app.name"));
-        window.setPreferredSize(new Dimension(640, 400));
+        window.setPreferredSize(new Dimension(720, 460));
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.addComponentListener(new ComponentAdapter() {
             @Override
@@ -138,12 +140,17 @@ public class App implements KeyListener {
 
 
     private void initScene() {
-        entities.add(new Entity("player")
+        addEntity(world);
+        addEntity(new Entity("player")
                 .setPosition(320, 120)
                 .setSize(16, 16)
                 .setEdgeColor(Color.RED)
                 .setFillColor(Color.RED.darker())
         );
+    }
+
+    private void addEntity(Entity e) {
+        entities.add(e);
     }
 
     private void update() {
@@ -163,6 +170,32 @@ public class App implements KeyListener {
         if (isKeyPressed(KeyEvent.VK_RIGHT)) {
             player.setPosition(player.getPosition().x + step, player.getPosition().y);
         }
+
+        for (Entity e : entities) {
+            updateEntity(e);
+            containsEntity(world, e);
+        }
+    }
+
+    public void updateEntity(Entity e) {
+
+    }
+
+    public void containsEntity(World w, Entity e) {
+        if (e.getPosition().x < w.getPosition().x) {
+            e.setPosition(w.getPosition().x, e.getPosition().y);
+        }
+        if (e.getPosition().y < w.getPosition().y) {
+            e.setPosition(e.getPosition().x, w.getPosition().y);
+        }
+
+        if (e.getPosition().x + e.getWidth() > w.getPosition().x + w.getWidth()) {
+            e.setPosition(w.getPosition().x + w.getWidth() - e.getWidth(), e.getPosition().y);
+        }
+        if (e.getPosition().y + e.getHeight() > w.getPosition().y + w.getHeight()) {
+            e.setPosition(e.getPosition().x, w.getPosition().y + w.getHeight() - e.getHeight());
+        }
+
     }
 
     private void render() {

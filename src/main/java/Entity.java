@@ -9,7 +9,8 @@ public class Entity {
     private String name = "entity_%d".formatted(id);
 
     private Point position = new Point();
-    private int width=16,height=16;
+    protected int width=16;
+    protected int height=16;
 
     private Color edgeColor = Color.WHITE;
     private Color fillColor = Color.BLUE;
