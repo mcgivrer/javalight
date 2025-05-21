@@ -23,7 +23,7 @@ public class App implements KeyListener {
     private boolean[] keys = new boolean[1024];
 
     private int debug = 0;
-    private RunningMode mode=RunningMode.PROD;
+    private RunningMode mode = RunningMode.PROD;
 
     private boolean exit = false;
     private boolean pause = false;
@@ -33,8 +33,8 @@ public class App implements KeyListener {
 
     public App() {
         System.out.printf(
-            "Welcome to %s (%s) !%n", messages.getString("app.name"),
-            messages.getString("app.version"));
+                "Welcome to %s (%s) !%n", messages.getString("app.name"),
+                messages.getString("app.version"));
     }
 
     public void initConfig(String configFilePath) {
@@ -42,8 +42,8 @@ public class App implements KeyListener {
             config.load(this.getClass().getResourceAsStream(configFilePath));
         } catch (Exception e) {
             System.err.printf("Unable to read configuration file %s:%s",
-                              configFilePath,
-                              e.getMessage());
+                    configFilePath,
+                    e.getMessage());
         }
     }
 
@@ -95,27 +95,28 @@ public class App implements KeyListener {
         System.out.println("Read configuration...");
         for (String key : config.stringPropertyNames()) {
             switch (key) {
-            case "app.debug", "debug", "d" -> {
-                        debug = Integer.parseInt(config.getProperty(key));
-                        System.out.printf("=> debug level set to %d%n", debug);
-                    }
-                    default -> {
+                case "app.debug", "debug", "d" -> {
+                    debug = Integer.parseInt(config.getProperty(key, "0"));
+                    System.out.printf("=> debug level set to %d%n", debug);
+                }
+                case "app.mode", "mode", "m" -> {
+                    mode = RunningMode.valueOf(config.getProperty(key, "PROD"));
+                }
+                default -> {
                 }
             }
         }
     }
 
     public <T> T getConfig(String key, T defaultValue) {
-        switch(key) {
-        case "app.debug","debug","d"-> {
-                    return (T) Integer.valueOf(config.getProperty(key,"0"));
-                }
-            case "app.mode","mode","m"-> {
-                        return (T) RunningMode.valueOf(config.getProperty(key,"PROD"));
-                    }
-                    default -> {
-                    System.err.println("Unknown configuration key %s".formatted(key));
-                }
+        switch (key) {
+            case "app.debug", "debug", "d" -> {
+                return (T) Integer.valueOf(config.getProperty(key, "0"));
+            }
+            case "app.mode", "mode", "m" -> {
+                return (T) RunningMode.valueOf(config.getProperty(key, "PROD"));
+            }
+            default -> System.err.printf("Unknown configuration key %s%n", key);
         }
         return null;
     }
@@ -128,8 +129,8 @@ public class App implements KeyListener {
                 render();
             }
             try {
-                Thread.sleep(1000/(FPS*2));
-            } catch(Exception e) {
+                Thread.sleep(1000 / (FPS * 2));
+            } catch (Exception e) {
                 // something goes wrong in the matrix
             }
         } while (!exit);
@@ -138,61 +139,61 @@ public class App implements KeyListener {
 
     private void initScene() {
         entities.add(new Entity("player")
-                     .setPosition(320,120)
-                     .setSize(16,16)
-                     .setEdgeColor(Color.RED)
-                     .setFillColor(Color.RED.darker())
-                    );
+                .setPosition(320, 120)
+                .setSize(16, 16)
+                .setEdgeColor(Color.RED)
+                .setFillColor(Color.RED.darker())
+        );
     }
 
     private void update() {
-        time+=1000/FPS;
+        time += 1000 / FPS;
 
         Entity player = getEntity("player");
         int step = 1;
-        if(isKeyPressed(KeyEvent.VK_UP)) {
-            player.setPosition(player.getPosition().x,player.getPosition().y-step);
+        if (isKeyPressed(KeyEvent.VK_UP)) {
+            player.setPosition(player.getPosition().x, player.getPosition().y - step);
         }
-        if(isKeyPressed(KeyEvent.VK_DOWN)) {
-            player.setPosition(player.getPosition().x,player.getPosition().y+step);
+        if (isKeyPressed(KeyEvent.VK_DOWN)) {
+            player.setPosition(player.getPosition().x, player.getPosition().y + step);
         }
-        if(isKeyPressed(KeyEvent.VK_LEFT)) {
-            player.setPosition(player.getPosition().x-step,player.getPosition().y);
+        if (isKeyPressed(KeyEvent.VK_LEFT)) {
+            player.setPosition(player.getPosition().x - step, player.getPosition().y);
         }
-        if(isKeyPressed(KeyEvent.VK_RIGHT)) {
-            player.setPosition(player.getPosition().x+step,player.getPosition().y);
+        if (isKeyPressed(KeyEvent.VK_RIGHT)) {
+            player.setPosition(player.getPosition().x + step, player.getPosition().y);
         }
     }
 
     private void render() {
         BufferStrategy bs = window.getBufferStrategy();
-        Graphics2D g = (Graphics2D)bs.getDrawGraphics();
+        Graphics2D g = (Graphics2D) bs.getDrawGraphics();
         g.setColor(Color.BLACK);
-        g.fillRect(0,0,window.getWidth(),window.getHeight());
+        g.fillRect(0, 0, window.getWidth(), window.getHeight());
         g.setColor(Color.WHITE);
-        g.drawString("time is flying %d".formatted(time),320,100);
-        for(Entity e:entities) {
-            drawEntity(g,e);
+        g.drawString("time is flying %d".formatted(time), 320, 100);
+        for (Entity e : entities) {
+            drawEntity(g, e);
         }
         g.dispose();
         bs.show();
     }
 
-
     private void drawEntity(Graphics2D g, Entity e) {
-        if (e.getFillColor()!=null) {
+        if (e.getFillColor() != null) {
             g.setColor(e.getFillColor());
-            g.fillRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
+            g.fillRect(e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
         }
-        if (e.getEdgeColor()!=null) {
+        if (e.getEdgeColor() != null) {
             g.setColor(e.getEdgeColor());
-            g.drawRect(e.getPosition().x,e.getPosition().y,e.getWidth(),e.getHeight());
+            g.drawRect(e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
         }
     }
 
     public Entity getEntity(String name) {
-        return entities.stream().filter(e->e.getName().equals(name)).findFirst().get();
+        return entities.stream().filter(e -> e.getName().equals(name)).findFirst().get();
     }
+
     private void dispose() {
         if (window != null) {
             window.dispose();
@@ -204,17 +205,20 @@ public class App implements KeyListener {
         app.run(args);
     }
 
-    public void keyTyped(KeyEvent e) {}
-    public void keyPressed(KeyEvent e) {
-        keys[e.getKeyCode()]=true;
+    public void keyTyped(KeyEvent e) {
     }
+
+    public void keyPressed(KeyEvent e) {
+        keys[e.getKeyCode()] = true;
+    }
+
     public void keyReleased(KeyEvent e) {
-        keys[e.getKeyCode()]=false;
-        switch(e.getKeyCode()) {
-        case KeyEvent.VK_ESCAPE -> {
-                exit=true;
+        keys[e.getKeyCode()] = false;
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_ESCAPE -> {
+                exit = true;
             }
-        case KeyEvent.VK_PAUSE,KeyEvent.VK_P -> {
+            case KeyEvent.VK_PAUSE, KeyEvent.VK_P -> {
                 pause = !pause;
             }
             default -> {
