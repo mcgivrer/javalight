@@ -190,7 +190,7 @@ public class App implements KeyListener {
         entities.stream().filter(Entity::isActive).forEach(e -> {
             updateEntity(e, elapsed);
             e.update(elapsed);
-            containsEntity(world, e);
+            constrainsEntity(world, e);
         });
         if (currentCamera != null) {
             currentCamera.update(elapsed);
@@ -209,27 +209,25 @@ public class App implements KeyListener {
         }
     }
 
-    public void containsEntity(World w, Entity e) {
+    public void constrainsEntity(World w, Entity e) {
         if (e.getPosition().getX() < w.getPosition().getX()) {
             e.setPosition(w.getPosition().getX(), e.getPosition().getY());
             e.setVelocity(
                     -(e.getVelocity().getX() * e.getMaterial().elasticity()),
                     e.getVelocity().getY());
-        }
-        if (e.getPosition().getY() < w.getPosition().getY()) {
-            e.setPosition(e.getPosition().getX(), w.getPosition().getY());
-            e.setVelocity(
-                    e.getVelocity().getX(),
-                    -e.getVelocity().getY() * e.getMaterial().elasticity());
-        }
-
-        if (e.getPosition().getX() + e.getWidth() > w.getPosition().getX() + w.getWidth()) {
+        } else if (e.getPosition().getX() + e.getWidth() > w.getPosition().getX() + w.getWidth()) {
             e.setPosition(w.getPosition().getX() + w.getWidth() - e.getWidth(), e.getPosition().getY());
             e.setVelocity(
                     -(e.getVelocity().getX() * e.getMaterial().elasticity()),
                     e.getVelocity().getY());
         }
-        if (e.getPosition().getY() + e.getHeight() > w.getPosition().getY() + w.getHeight()) {
+
+        if (e.getPosition().getY() < w.getPosition().getY()) {
+            e.setPosition(e.getPosition().getX(), w.getPosition().getY());
+            e.setVelocity(
+                    e.getVelocity().getX(),
+                    -e.getVelocity().getY() * e.getMaterial().elasticity());
+        } else if (e.getPosition().getY() + e.getHeight() > w.getPosition().getY() + w.getHeight()) {
             e.setPosition(e.getPosition().getX(), w.getPosition().getY() + w.getHeight() - e.getHeight());
             e.setVelocity(
                     e.getVelocity().getX(),
