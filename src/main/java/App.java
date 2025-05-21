@@ -159,6 +159,17 @@ public class App implements KeyListener {
                 .setFillColor(Color.RED.darker())
                 .setMaterial(new Material("body", 0.92, 0.98, 1.0));
         addEntity(player);
+        Random rand = new Random(1234);
+        for (int i = 0; i < 20; i++) {
+            addEntity(new Entity("enemy_%d".formatted(i))
+                    .setPosition(rand.nextDouble(world.getWidth()), rand.nextDouble(world.getHeight()))
+                    .setSize(8, 8)
+                    .setEdgeColor(Color.ORANGE)
+                    .setFillColor(Color.ORANGE.darker())
+                    .setMaterial(new Material("enemy", 1.0, 1.0, 1.0))
+                    .setVelocity(-0.2 + rand.nextDouble(0.4), -0.2 + rand.nextDouble(0.4))
+            );
+        }
         setCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
     }
 
