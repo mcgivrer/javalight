@@ -30,9 +30,10 @@ public class App implements KeyListener {
 
     private World world = new World("earth", 320, 200);
 
-    private BufferedImage renderBuffer = new BufferedImage(320, 200, BufferedImage.TYPE_INT_ARGB);
+    private final BufferedImage renderBuffer = new BufferedImage(320, 200, BufferedImage.TYPE_INT_ARGB);
 
-    private List<Entity> entities = new ArrayList<>();
+    private final List<Entity> entities = new ArrayList<>();
+    private final List<Light> lights = new ArrayList<>();
     private Camera currentCamera;
 
     public App() {
@@ -247,18 +248,28 @@ public class App implements KeyListener {
                         RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                         RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON,
                         RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
-        // draw all entities.
-        entities.stream().filter(Entity::isActive).forEach(e -> {
-            if (currentCamera != null) {
-                g.translate(-currentCamera.position.getX(), -currentCamera.position.getY());
-            }
 
-            drawEntity(g, e);
-            e.draw(g);
-            if (currentCamera != null) {
-                g.translate(currentCamera.position.getX(), currentCamera.position.getY());
-            }
-        });
+        // draw all entities.
+        entities.stream()
+                .filter(Entity::isActive)
+                .forEach(e -> {
+                    if (currentCamera != null) {
+                        g.translate(-currentCamera.position.getX(), -currentCamera.position.getY());
+                    }
+
+                    drawEntity(g, e);
+                    e.draw(g);
+                    if (currentCamera != null) {
+                        g.translate(currentCamera.position.getX(), currentCamera.position.getY());
+                    }
+                });
+
+        // rendering lights
+        lights.stream()
+                .filter(Entity::isActive)
+                .forEach(l -> {
+                    drawLight(g, (Light) l);
+                });
 
 
         g.dispose();
@@ -278,6 +289,10 @@ public class App implements KeyListener {
         g2.drawString(getFormatedTime(time), 20, window.getHeight() - 20);
         g2.dispose();
         bs.show();
+    }
+
+    private void drawLight(Graphics2D g, Light e) {
+
     }
 
     private String getFormatedTime(long time) {
