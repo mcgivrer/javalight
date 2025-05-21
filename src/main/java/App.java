@@ -3,10 +3,8 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ResourceBundle;
-import java.util.Properties;
+import java.util.*;
 import java.util.List;
-import java.util.ArrayList;
 
 public class App implements KeyListener {
 
@@ -35,6 +33,7 @@ public class App implements KeyListener {
     private BufferedImage renderBuffer = new BufferedImage(320, 200, BufferedImage.TYPE_INT_ARGB);
 
     private List<Entity> entities = new ArrayList<>();
+    private Camera currentCamera;
 
     public App() {
         System.out.printf(
@@ -152,15 +151,20 @@ public class App implements KeyListener {
 
     private void initScene() {
         addEntity(world);
-        addEntity(new Entity("player")
+        Entity player = new Entity("player")
                 .setPosition(20, 20)
                 .setSize(16, 16)
                 .setEdgeColor(Color.RED)
-                .setFillColor(Color.RED.darker())
-        );
+                .setFillColor(Color.RED.darker());
+        addEntity(player);
+        setCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
     }
 
-    private void addEntity(Entity e) {
+    public void setCamera(Camera cam) {
+        this.currentCamera = cam;
+    }
+
+    public void addEntity(Entity e) {
         entities.add(e);
     }
 
@@ -184,8 +188,12 @@ public class App implements KeyListener {
 
         entities.stream().filter(Entity::isActive).forEach(e -> {
             updateEntity(e, elapsed);
+            e.update(elapsed);
             containsEntity(world, e);
         });
+        if (currentCamera != null) {
+            currentCamera.update(elapsed);
+        }
     }
 
     public void updateEntity(Entity e, long elapsed) {
@@ -219,12 +227,26 @@ public class App implements KeyListener {
 
     private void render() {
         Graphics2D g = renderBuffer.createGraphics();
+        //clear buffer
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, window.getWidth(), window.getHeight());
-
+        // configure rendering
+        g.setRenderingHints(
+                Map.of(
+                        RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
+                        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON,
+                        RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+        // draw all entities.
         entities.stream().filter(Entity::isActive).forEach(e -> {
+            if (currentCamera != null) {
+                g.translate(-currentCamera.position.getX(), -currentCamera.position.getY());
+            }
+
             drawEntity(g, e);
             e.draw(g);
+            if (currentCamera != null) {
+                g.translate(currentCamera.position.getX(), currentCamera.position.getY());
+            }
         });
 
 
@@ -232,6 +254,10 @@ public class App implements KeyListener {
 
         BufferStrategy bs = window.getBufferStrategy();
         Graphics2D g2 = (Graphics2D) bs.getDrawGraphics();
+        g2.setRenderingHints(
+                Map.of(
+                        RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
+                        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
         g2.drawImage(renderBuffer,
                 0, 0, window.getWidth(), window.getHeight(),
                 0, 0, renderBuffer.getWidth(), renderBuffer.getHeight(),
