@@ -1,18 +1,30 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.awt.event.*;
 import java.util.ResourceBundle;
 import java.util.Properties;
 
 
-public class App {
+public class App implements KeyListener{
+
+    public enum RunningMode {
+	    DEV,
+	    TEST,
+	    PROD;
+    }
+
     public static final ResourceBundle messages = ResourceBundle.getBundle("i18n/messages");
     public static Properties config = new Properties();
-
+	private static final long FPS = 60;
     private JFrame window;
+    
     private int debug = 0;
+    private RunningMode mode=RunningMode.PROD;
+
     private boolean exit = false;
     private boolean pause = false;
+    private long time = System.currentTimeMillis();
 
     public App() {
         System.out.printf(
@@ -57,9 +69,12 @@ public class App {
                 System.exit(0);
             }
         });
+        window.addKeyListener(this);
         window.pack();
         window.setBackground(Color.BLACK);
         window.setVisible(true);
+        window.createBufferStrategy(3);
+        window.requestFocus();
     }
 
     public void parseArgs(String[] args) {
@@ -85,24 +100,48 @@ public class App {
         }
     }
 
+    public <T> T getConfig(String key, T defaultValue){
+	switch(key){
+		case "app.debug","debug","d"->{
+		  return (T) Integer.valueOf(config.getProperty(key,"0"));
+		}
+		case "app.mode","mode","m"->{
+		  return (T) RunningMode.valueOf(config.getProperty(key,"PROD"));
+		}
+		default -> {
+		  System.err.println("Unknown configuration key %s".formatted(key));
+		}
+	}
+	return null;
+    }
+
     private void loop() {
         do {
             if (!pause) {
                 update();
                 render();
             }
+            try{
+            	Thread.sleep(1000/FPS);
+            }catch(Exception e){
+            	// something goes wrong in the matrix
+            }
         } while (!exit);
     }
 
     private void update() {
+    	time+=1000/FPS;
     }
 
     private void render() {
-        Graphics2D g = (Graphics2D)window.getGraphics();
+        BufferStrategy bs = window.getBufferStrategy();
+        Graphics2D g = (Graphics2D)bs.getDrawGraphics();
         g.setColor(Color.BLACK);
         g.fillRect(0,0,window.getWidth(),window.getHeight());
-
+		g.setColor(Color.WHITE);
+		g.drawString("time is flying %d".formatted(time),320,100);
         g.dispose();
+        bs.show();
     }
 
 
@@ -116,4 +155,21 @@ public class App {
         App app = new App();
         app.run(args);
     }
+    
+    public void keyTyped(KeyEvent e){}
+    public void keyPressed(KeyEvent e){}
+    public void keyReleased(KeyEvent e){
+    	switch(e.getKeyCode()){
+    		case KeyEvent.VK_ESCAPE ->{
+    			exit=true;
+    		}
+    		case KeyEvent.VK_PAUSE,KeyEvent.VK_P -> {
+    			pause = !pause;
+    		}
+    		default ->{
+    		// nothing to do in that case
+    		}
+    	}
+    }
+    
 }
