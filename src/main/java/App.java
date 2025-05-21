@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 import java.util.Properties;
 import java.util.List;
@@ -27,9 +28,11 @@ public class App implements KeyListener {
 
     private boolean exit = false;
     private boolean pause = false;
-    private long time = System.currentTimeMillis();
+    private long time = 0;
 
-    private World world = new World("earth", 640, 400);
+    private World world = new World("earth", 320, 200);
+
+    private BufferedImage renderBuffer = new BufferedImage(320, 200, BufferedImage.TYPE_INT_ARGB);
 
     private List<Entity> entities = new ArrayList<>();
 
@@ -124,17 +127,25 @@ public class App implements KeyListener {
     }
 
     private void loop() {
+        long startTime = 0, endTime = 0, elapsed = 0;
         initScene();
+        endTime = System.currentTimeMillis();
         do {
+
+            startTime = endTime;
             if (!pause) {
-                update();
+                update(elapsed);
                 render();
             }
             try {
-                Thread.sleep(1000 / (FPS * 2));
+                Thread.sleep((1000 / (FPS)) - elapsed > 0 ? (1000 / (FPS)) - elapsed : 1);
             } catch (Exception e) {
                 // something goes wrong in the matrix
             }
+
+            endTime = System.currentTimeMillis();
+            elapsed = endTime - startTime;
+
         } while (!exit);
     }
 
@@ -142,7 +153,7 @@ public class App implements KeyListener {
     private void initScene() {
         addEntity(world);
         addEntity(new Entity("player")
-                .setPosition(320, 120)
+                .setPosition(20, 20)
                 .setSize(16, 16)
                 .setEdgeColor(Color.RED)
                 .setFillColor(Color.RED.darker())
@@ -153,73 +164,97 @@ public class App implements KeyListener {
         entities.add(e);
     }
 
-    private void update() {
-        time += 1000 / FPS;
+    private void update(long elapsed) {
+        time += elapsed;
 
         Entity player = getEntity("player");
-        int step = 1;
+        double step = 0.1;
         if (isKeyPressed(KeyEvent.VK_UP)) {
-            player.setPosition(player.getPosition().x, player.getPosition().y - step);
+            player.setVelocity(player.getVelocity().getX(), -step * 6);
         }
         if (isKeyPressed(KeyEvent.VK_DOWN)) {
-            player.setPosition(player.getPosition().x, player.getPosition().y + step);
+            player.setVelocity(player.getVelocity().getX(), +step);
         }
         if (isKeyPressed(KeyEvent.VK_LEFT)) {
-            player.setPosition(player.getPosition().x - step, player.getPosition().y);
+            player.setVelocity(-step, player.getVelocity().getY());
         }
         if (isKeyPressed(KeyEvent.VK_RIGHT)) {
-            player.setPosition(player.getPosition().x + step, player.getPosition().y);
+            player.setVelocity(+step, player.getVelocity().getY());
         }
 
-        for (Entity e : entities) {
-            updateEntity(e);
+        entities.stream().filter(Entity::isActive).forEach(e -> {
+            updateEntity(e, elapsed);
             containsEntity(world, e);
-        }
+        });
     }
 
-    public void updateEntity(Entity e) {
-
+    public void updateEntity(Entity e, long elapsed) {
+        if (e.getPhysicType().equals(PhysicType.DYNAMIC)) {
+            e.setPosition(
+                    (e.getPosition().getX() + (e.getVelocity().getX() * elapsed)),
+                    (e.getPosition().getY() + ((e.getVelocity().getY() + (world.getGravity() * 0.01)) * elapsed)));
+            //reduce velocity
+            e.setVelocity(
+                    (e.getVelocity().getX() * 0.90),
+                    (e.getVelocity().getY() * 0.90));
+        }
     }
 
     public void containsEntity(World w, Entity e) {
-        if (e.getPosition().x < w.getPosition().x) {
-            e.setPosition(w.getPosition().x, e.getPosition().y);
+        if (e.getPosition().getX() < w.getPosition().getX()) {
+            e.setPosition(w.getPosition().getX(), e.getPosition().getY());
         }
-        if (e.getPosition().y < w.getPosition().y) {
-            e.setPosition(e.getPosition().x, w.getPosition().y);
+        if (e.getPosition().getY() < w.getPosition().getY()) {
+            e.setPosition(e.getPosition().getX(), w.getPosition().getY());
         }
 
-        if (e.getPosition().x + e.getWidth() > w.getPosition().x + w.getWidth()) {
-            e.setPosition(w.getPosition().x + w.getWidth() - e.getWidth(), e.getPosition().y);
+        if (e.getPosition().getX() + e.getWidth() > w.getPosition().getX() + w.getWidth()) {
+            e.setPosition(w.getPosition().getX() + w.getWidth() - e.getWidth(), e.getPosition().getY());
         }
-        if (e.getPosition().y + e.getHeight() > w.getPosition().y + w.getHeight()) {
-            e.setPosition(e.getPosition().x, w.getPosition().y + w.getHeight() - e.getHeight());
+        if (e.getPosition().getY() + e.getHeight() > w.getPosition().getY() + w.getHeight()) {
+            e.setPosition(e.getPosition().getX(), w.getPosition().getY() + w.getHeight() - e.getHeight());
         }
 
     }
 
     private void render() {
-        BufferStrategy bs = window.getBufferStrategy();
-        Graphics2D g = (Graphics2D) bs.getDrawGraphics();
+        Graphics2D g = renderBuffer.createGraphics();
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, window.getWidth(), window.getHeight());
-        g.setColor(Color.WHITE);
-        g.drawString("time is flying %d".formatted(time), 320, 100);
-        for (Entity e : entities) {
+
+        entities.stream().filter(Entity::isActive).forEach(e -> {
             drawEntity(g, e);
-        }
+            e.draw(g);
+        });
+
+
         g.dispose();
+
+        BufferStrategy bs = window.getBufferStrategy();
+        Graphics2D g2 = (Graphics2D) bs.getDrawGraphics();
+        g2.drawImage(renderBuffer,
+                0, 0, window.getWidth(), window.getHeight(),
+                0, 0, renderBuffer.getWidth(), renderBuffer.getHeight(),
+                null);
+        g2.setColor(Color.ORANGE);
+        g2.setFont(g.getFont().deriveFont(12.0f));
+        g2.drawString(getFormatedTime(time), 20, window.getHeight() - 20);
+        g2.dispose();
         bs.show();
+    }
+
+    private String getFormatedTime(long time) {
+        return "%02d:%02d:%02d".formatted(((time / 1000) * 3600) % 24, ((time / 1000) / 60) % 60, ((time / 1000) % 60));
     }
 
     private void drawEntity(Graphics2D g, Entity e) {
         if (e.getFillColor() != null) {
             g.setColor(e.getFillColor());
-            g.fillRect(e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
+            g.fillRect((int) e.getPosition().getX(), (int) e.getPosition().getY(), (int) e.getWidth(), (int) e.getHeight());
         }
         if (e.getEdgeColor() != null) {
             g.setColor(e.getEdgeColor());
-            g.drawRect(e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
+            g.drawRect((int) e.getPosition().getX(), (int) e.getPosition().getY(), (int) e.getWidth(), (int) e.getHeight());
         }
     }
 
