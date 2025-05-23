@@ -1,5 +1,3 @@
-
 public enum LightType {
-    POINT, DIRECTIONAL, SPOT, AREA;
-
+    DIRECTIONAL, SPOT, AREA, POINT
 }
