@@ -206,8 +206,8 @@ public class App implements KeyListener {
         setCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
     }
 
-    private void addLight(Light l) {
-        lights.add(l);
+    private void addLight(Light light) {
+        lights.add(light);
     }
 
     public void setCamera(Camera cam) {
@@ -335,6 +335,7 @@ public class App implements KeyListener {
 
         BufferStrategy bs = window.getBufferStrategy();
         Graphics2D g2 = (Graphics2D) bs.getDrawGraphics();
+
         g2.setRenderingHints(Map.of(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                 RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
 
