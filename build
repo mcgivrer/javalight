@@ -1,3 +1,4 @@
+#!/bin/bash
 # build script (c) 2025 Frederic Delorme
 #
 # Please adapt the `project_name`, `project_version` and `main_class` variables to fit your own project.
@@ -75,5 +76,6 @@ Implementation-Version: ${project_version}
     done
   esac;
 done
+
 
 
