@@ -5,40 +5,33 @@ import java.awt.event.*;
 import java.util.ResourceBundle;
 import java.util.Properties;
 
-
-public class App implements KeyListener{
+public class App implements KeyListener {
 
     public enum RunningMode {
-	    DEV,
-	    TEST,
-	    PROD;
+        DEV, TEST, PROD;
     }
 
     public static final ResourceBundle messages = ResourceBundle.getBundle("i18n/messages");
     public static Properties config = new Properties();
-	private static final long FPS = 60;
+    private static final long FPS = 60;
     private JFrame window;
-    
+
     private int debug = 0;
-    private RunningMode mode=RunningMode.PROD;
+    private RunningMode mode = RunningMode.PROD;
 
     private boolean exit = false;
     private boolean pause = false;
     private long time = System.currentTimeMillis();
 
     public App() {
-        System.out.printf(
-                "Welcome to %s (%s) !%n", messages.getString("app.name"),
-                messages.getString("app.version"));
+        System.out.printf("Welcome to %s (%s) !%n", messages.getString("app.name"), messages.getString("app.version"));
     }
 
     public void initConfig(String configFilePath) {
         try {
             config.load(this.getClass().getResourceAsStream(configFilePath));
         } catch (Exception e) {
-            System.err.printf("Unable to read configuration file %s:%s",
-                    configFilePath,
-                    e.getMessage());
+            System.err.printf("Unable to read configuration file %s:%s", configFilePath, e.getMessage());
         }
     }
 
@@ -80,9 +73,11 @@ public class App implements KeyListener{
     public void parseArgs(String[] args) {
         System.out.println("Parse command line arguments...");
         for (String arg : args) {
-            String[] keyVal = arg.split("=");
-            config.setProperty(keyVal[0], keyVal[1]);
-            System.out.printf(" |_ Override config:%s=%s%n", keyVal[0], keyVal[1]);
+            if (arg.contains("=")) {
+                String[] keyVal = arg.split("=");
+                config.setProperty(keyVal[0], keyVal[1]);
+                System.out.printf(" |_ Override config: %s=%s%n", keyVal[0], keyVal[1]);
+            }
         }
     }
 
@@ -94,56 +89,69 @@ public class App implements KeyListener{
                     debug = Integer.parseInt(config.getProperty(key));
                     System.out.printf("=> debug level set to %d%n", debug);
                 }
+                case "app.mode", "mode", "m" -> {
+                    mode = RunningMode.valueOf(config.getProperty(key));
+                    System.out.printf("=> Running mode set to %s%n", mode);
+                }
                 default -> {
+                    System.err.printf("Unnknown argument %s%n", key);
                 }
             }
         }
     }
 
-    public <T> T getConfig(String key, T defaultValue){
-	switch(key){
-		case "app.debug","debug","d"->{
-		  return (T) Integer.valueOf(config.getProperty(key,"0"));
-		}
-		case "app.mode","mode","m"->{
-		  return (T) RunningMode.valueOf(config.getProperty(key,"PROD"));
-		}
-		default -> {
-		  System.err.println("Unknown configuration key %s".formatted(key));
-		}
-	}
-	return null;
+    public <T extends Object> T getConfig(String key, T defaultValue) {
+        switch (key) {
+        case "app.debug", "debug", "d" -> {
+            return (T) Integer.valueOf(config.getProperty(key, "0"));
+        }
+        case "app.mode", "mode", "m" -> {
+            return (T) RunningMode.valueOf(config.getProperty(key, "PROD"));
+        }
+        default -> {
+            System.err.println("Unknown configuration key %s".formatted(key));
+        }
+        }
+        return null;
     }
 
     private void loop() {
         do {
             if (!pause) {
                 update();
-                render();
+                render(time);
             }
-            try{
-            	Thread.sleep(1000/FPS);
-            }catch(Exception e){
-            	// something goes wrong in the matrix
+            try {
+                Thread.sleep(1000 / FPS);
+            } catch (Exception e) {
+                // something goes wrong in the matrix
             }
         } while (!exit);
     }
 
     private void update() {
-    	time+=1000/FPS;
+        time += 1000 / FPS;
     }
 
-    private void render() {
+    private void render(long time) {
         BufferStrategy bs = window.getBufferStrategy();
-        Graphics2D g = (Graphics2D)bs.getDrawGraphics();
+        Graphics2D g = (Graphics2D) bs.getDrawGraphics();
         g.setColor(Color.BLACK);
-        g.fillRect(0,0,window.getWidth(),window.getHeight());
-		g.setColor(Color.WHITE);
-		g.drawString("time is flying %d".formatted(time),320,100);
+        g.fillRect(0, 0, window.getWidth(), window.getHeight());
+        g.setColor(Color.WHITE);
+        g.drawString("Time is flying %s".formatted(getFormattedTime(time)), (window.getWidth()/2)-60, window.getHeight()/2);
         g.dispose();
         bs.show();
     }
 
+    private String getFormattedTime(long time){
+	return "%02d:%02d:%02d.%03d".formatted(
+		(time/(1000*3600)) % 24,
+		(time/(1000*60)) % 60,
+		(time/1000) % 60,
+		time % 1000
+		);
+    }
 
     private void dispose() {
         if (window != null) {
@@ -155,21 +163,25 @@ public class App implements KeyListener{
         App app = new App();
         app.run(args);
     }
-    
-    public void keyTyped(KeyEvent e){}
-    public void keyPressed(KeyEvent e){}
-    public void keyReleased(KeyEvent e){
-    	switch(e.getKeyCode()){
-    		case KeyEvent.VK_ESCAPE ->{
-    			exit=true;
-    		}
-    		case KeyEvent.VK_PAUSE,KeyEvent.VK_P -> {
-    			pause = !pause;
-    		}
-    		default ->{
-    		// nothing to do in that case
-    		}
-    	}
+
+    public void keyTyped(KeyEvent e) {
     }
-    
+
+    public void keyPressed(KeyEvent e) {
+    }
+
+    public void keyReleased(KeyEvent e) {
+        switch (e.getKeyCode()) {
+        case KeyEvent.VK_ESCAPE -> {
+            exit = true;
+        }
+        case KeyEvent.VK_PAUSE, KeyEvent.VK_P -> {
+            pause = !pause;
+        }
+        default -> {
+            // nothing to do in that case
+        }
+        }
+    }
+
 }

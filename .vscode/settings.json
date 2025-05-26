@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": [
+        "src/main/java",
+        "src/main/resources"
+    ],
+    "java.project.outputPath": "target/classes",
+    "java.format.settings.url": ".vscode/java-formatter.xml"
+}
