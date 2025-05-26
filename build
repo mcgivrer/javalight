@@ -11,7 +11,7 @@
 #     build r
 # will execute the create JAR.
 #
-project_name=JavaApp
+project_name=JDemo
 project_version=0.0.1
 main_class=App
 #
@@ -44,7 +44,7 @@ do
       ;;
     r | run | execute)
       echo "run ..."
-      java -jar target/build/${project_name}-$app_run-${project_version}.jar -cp target/build/libs/* ${main_class}
+      java -jar target/build/${project_name}-${main_class}-${project_version}.jar -cp target/build/libs/* ${main_class}
       ;;
     b | build)
       echo "build ..."
