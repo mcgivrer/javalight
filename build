@@ -43,9 +43,9 @@
 # will execute this single step
 # - (r) run the created JAR in `/target/build/[app_name]-[main_class]-[app_version].jar`.
 #
-PROJECT_NAME=JavaGUI
+PROJECT_NAME=JavaLight
 PROJECT_VERSION=0.0.1
-MAIN_CLASS=App
+MAIN_CLASS=core.App
 AUTHOR_NAME="Frédéric Delorme<frederic.delorme@gmail.com>"
 VENDOR_NAME=SnapGame
 # List of paths to jar dependencies (space separated).
