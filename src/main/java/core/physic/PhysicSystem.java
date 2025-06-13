@@ -9,11 +9,11 @@ public class PhysicSystem {
 
     private App app;
 
-    public PhysicSystem(App app){
+    public PhysicSystem(App app) {
         this.app = app;
     }
 
-     public void update(Scene scene, long elapsed) {
+    public void update(Scene scene, long elapsed) {
 
         app.time += elapsed;
 
@@ -35,8 +35,9 @@ public class PhysicSystem {
 
     public void updateEntity(Scene scene, Entity e, long elapsed) {
         if (e.getPhysicType().equals(PhysicType.DYNAMIC)) {
-            e.setPosition((e.getPosition().getX() + (e.getVelocity().getX() * elapsed)), (e.getPosition().getY()
-                    + ((e.getVelocity().getY() + (scene.getWorld().getGravity() * 0.01)) * elapsed)));
+            e.setPosition(
+                    (e.getPosition().getX() + ((e.getVelocity().getX() + (scene.getWorld().getGravity().getX() * 0.01)) * elapsed)),
+                    (e.getPosition().getY() + ((e.getVelocity().getY() + (scene.getWorld().getGravity().getY() * 0.01)) * elapsed)));
             // reduce velocity
             e.setVelocity((e.getVelocity().getX() * e.getMaterial().friction()),
                     (e.getVelocity().getY() * e.getMaterial().friction()));

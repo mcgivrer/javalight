@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import core.App;
+import core.scene.Scene;
 
 public class InputHandler implements KeyListener, MouseListener, MouseMotionListener {
 
@@ -70,26 +71,36 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
     @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
+
+        Scene scene = app.getCurrentScene();
+        if (scene != null) {
+            scene.onKeyPressed(app, e.getKeyCode());
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         keys[e.getKeyCode()] = false;
         switch (e.getKeyCode()) {
-        case KeyEvent.VK_ESCAPE -> {
-            app.setExit(true);
-        }
-        case KeyEvent.VK_D -> {
-            if (e.isControlDown()) {
-                app.setDebug((app.getDebug() + 1) % 5);
+            case KeyEvent.VK_ESCAPE -> {
+                app.setExit(true);
+            }
+            case KeyEvent.VK_D -> {
+                if (e.isControlDown()) {
+                    app.setDebug((app.getDebug() + 1) % 5);
+                }
+            }
+            case KeyEvent.VK_PAUSE, KeyEvent.VK_P -> {
+                app.setPause(!app.isPause());
+            }
+            default -> {
+                // nothing to do in that case
             }
         }
-        case KeyEvent.VK_PAUSE, KeyEvent.VK_P -> {
-            app.setPause(!app.isPause());
-        }
-        default -> {
-            // nothing to do in that case
-        }
+
+        Scene scene = app.getCurrentScene();
+        if (scene != null) {
+            scene.onKeyReleased(app, e.getKeyCode());
         }
     }
 

@@ -52,4 +52,5 @@ public class AbstractScene {
     public Camera getActiveCamera() {
         return activeCamera;
     }
+
 }

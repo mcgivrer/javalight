@@ -1,13 +1,6 @@
 package core.gfx;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.RadialGradientPaint;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -33,6 +26,7 @@ public class Renderer {
 
     private JFrame window;
     private final BufferedImage renderBuffer;
+    private boolean displayHelp;
 
     public Renderer(App app) {
         this.app = app;
@@ -102,10 +96,10 @@ public class Renderer {
         });
 
         g.dispose();
-        drawToWindow();
+        drawToWindow(scene);
     }
 
-    private void drawToWindow() {
+    private void drawToWindow(Scene scene) {
         BufferStrategy bs = window.getBufferStrategy();
         Graphics2D g = (Graphics2D) bs.getDrawGraphics();
 
@@ -132,65 +126,70 @@ public class Renderer {
 
         // Dessin du buffer dans la fenêtre, centré et redimensionné
         g.drawImage(renderBuffer, xOffset, yOffset, targetWidth, targetHeight, null);
-
+        if (displayHelp) {
+            displayHelp(g);
+        }
         if (app.debug > 0) {
-            drawDebugInfo(g);
+            drawDebugInfo(g, scene);
         }
         g.dispose();
         bs.show();
     }
 
-    private void drawDebugInfo(Graphics2D g) {
+    private void drawDebugInfo(Graphics2D g, Scene scene) {
         // draw debug information
         g.setColor(Color.ORANGE);
         g.setFont(g.getFont().deriveFont(12.0f));
         g.drawString(
-                "[ debug:%d | time:%s | mode:%s | update:%s ]".formatted(app.debug,
-                        Utils.getFormatedTime(app.getGameTime()), app.mode, app.pause ? "PAUSED" : "RUNNING"),
+                "[ debug:%d | time:%s | mode:%s | update:%s | g:%.2f]".formatted(app.debug,
+                        Utils.getFormatedTime(app.getGameTime()),
+                        app.mode,
+                        app.pause ? "PAUSED" : "RUNNING",
+                        scene.getWorld().getGravity().getY()),
                 20, window.getHeight() - 20);
     }
 
     private void drawLight(Graphics2D g, Light e) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (e.getIntensity())));
         switch (e.getLightType()) {
-        case LightType.POINT -> {
-            float[] dist = { 0.0f, 0.3f, 0.8f };
-            Color[] colors = { e.getFillColor(), // centre lumineux, légèrement jaune
-                    Utils.setAlpha(e.getFillColor(), (float) (e.getIntensityDraw())), // bord transparent
-                    Utils.setAlpha(e.getFillColor(), (float) (e.getIntensityDraw() * 0.2)), // bord transparent
-            };
-            RadialGradientPaint paint = new RadialGradientPaint(e.getPosition(), (float) e.getRadius(), dist, colors);
-            Composite oldComposite = g.getComposite();
-            g.setPaint(paint);
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-            g.fillOval((int) (e.getPosition().getX() - e.getRadius() + Math.random() * e.getVibration()),
-                    (int) (e.getPosition().getY() - e.getRadius() + Math.random() * e.getVibration()),
-                    (int) e.getRadius() * 2, (int) e.getRadius() * 2);
-            g.setComposite(oldComposite);
-        }
-        case LightType.DIRECTIONAL -> {
+            case LightType.POINT -> {
+                float[] dist = {0.0f, 0.3f, 0.8f};
+                Color[] colors = {e.getFillColor(), // centre lumineux, légèrement jaune
+                        Utils.setAlpha(e.getFillColor(), (float) (e.getIntensityDraw())), // bord transparent
+                        Utils.setAlpha(e.getFillColor(), (float) (e.getIntensityDraw() * 0.2)), // bord transparent
+                };
+                RadialGradientPaint paint = new RadialGradientPaint(e.getPosition(), (float) e.getRadius(), dist, colors);
+                Composite oldComposite = g.getComposite();
+                g.setPaint(paint);
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                g.fillOval((int) (e.getPosition().getX() - e.getRadius() + Math.random() * e.getVibration()),
+                        (int) (e.getPosition().getY() - e.getRadius() + Math.random() * e.getVibration()),
+                        (int) e.getRadius() * 2, (int) e.getRadius() * 2);
+                g.setComposite(oldComposite);
+            }
+            case LightType.DIRECTIONAL -> {
 
-            g.setColor(e.getFillColor());
-            g.fill(new Rectangle2D.Double(e.getPosition().getX(), e.getPosition().getY(), e.getWidth(), e.getHeight()));
-        }
-        case LightType.SPOT -> {
+                g.setColor(e.getFillColor());
+                g.fill(new Rectangle2D.Double(e.getPosition().getX(), e.getPosition().getY(), e.getWidth(), e.getHeight()));
+            }
+            case LightType.SPOT -> {
 
-            g.setColor(Utils.setAlpha(e.getFillColor(), (float) e.getIntensityDraw()));
-            g.rotate(e.getDirection(), e.getPosition().getX(), e.getPosition().getY());
-            Polygon p = new Polygon(
-                    new int[] { (int) e.getPosition().getX(), (int) e.getPosition().getX() + (int) e.getWidth() / 2,
-                            (int) e.getPosition().getX() + (int) e.getWidth() },
-                    new int[] { (int) e.getPosition().getY(), (int) e.getPosition().getY() + (int) e.getHeight(),
-                            (int) e.getPosition().getY() },
-                    3);
-            g.fill(p);
-            g.rotate(-e.getDirection(), e.getPosition().getX(), e.getPosition().getY());
-        }
-        case LightType.AREA -> {
+                g.setColor(Utils.setAlpha(e.getFillColor(), (float) e.getIntensityDraw()));
+                g.rotate(e.getDirection(), e.getPosition().getX(), e.getPosition().getY());
+                Polygon p = new Polygon(
+                        new int[]{(int) e.getPosition().getX(), (int) e.getPosition().getX() + (int) e.getWidth() / 2,
+                                (int) e.getPosition().getX() + (int) e.getWidth()},
+                        new int[]{(int) e.getPosition().getY(), (int) e.getPosition().getY() + (int) e.getHeight(),
+                                (int) e.getPosition().getY()},
+                        3);
+                g.fill(p);
+                g.rotate(-e.getDirection(), e.getPosition().getX(), e.getPosition().getY());
+            }
+            case LightType.AREA -> {
 
-            g.setColor(e.getFillColor());
-            g.fill(new Rectangle2D.Double(e.getPosition().getX(), e.getPosition().getY(), e.getWidth(), e.getHeight()));
-        }
+                g.setColor(e.getFillColor());
+                g.fill(new Rectangle2D.Double(e.getPosition().getX(), e.getPosition().getY(), e.getWidth(), e.getHeight()));
+            }
         }
     }
 
@@ -207,10 +206,28 @@ public class Renderer {
         }
     }
 
+    private void displayHelp(Graphics g) {
+        String[] helpTextLines = App.messages.getString("app.help.text").split("\n");
+        int iy = window.getHeight() - 40;
+        g.setColor(Color.WHITE);
+        g.setFont(g.getFont().deriveFont(Font.BOLD, 12.0f));
+        int lineHeight = g.getFontMetrics().getHeight();
+        for (String l : helpTextLines) {
+            g.setColor(Color.BLACK);
+            g.drawString(l, 20 + 1, iy + 1);
+            g.setColor(Color.WHITE);
+            g.drawString(l, 20, iy);
+            iy -= lineHeight;
+        }
+    }
+
     public void dispose() {
         if (window != null) {
             window.dispose();
         }
     }
 
+    public void setDisplayHelp(boolean b) {
+        this.displayHelp = b;
+    }
 }

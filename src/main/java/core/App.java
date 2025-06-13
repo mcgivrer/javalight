@@ -131,10 +131,6 @@ public class App {
         }
     }
 
-    public Configuration getConfiguration() {
-        return config;
-    }
-
     public int getDebug() {
         return debug;
     }
@@ -151,8 +147,21 @@ public class App {
         pause = pb;
     }
 
+    public Configuration getConfiguration() {
+        return config;
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
+    }
+
     public KeyListener getInputHandler() {
         return inputHandler;
     }
+
+    public Scene getCurrentScene() {
+        return currentScene;
+    }
+
 
 }

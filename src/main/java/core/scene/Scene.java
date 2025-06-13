@@ -28,6 +28,12 @@ public interface Scene {
     default void dispose(App app) {
     }
 
+    default void onKeyPressed(App app, int keyCode) {
+    }
+
+    default void onKeyReleased(App app, int key) {
+    }
+
     List<Entity> getEntities();
 
     List<Light> getLights();
@@ -37,4 +43,5 @@ public interface Scene {
     World getWorld();
 
     Camera getActiveCamera();
+
 }

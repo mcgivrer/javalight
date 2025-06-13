@@ -2,11 +2,12 @@ package core.entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
 import core.physic.PhysicType;
 
 public class World extends Entity {
-    private double gravity = 9.81f;
+    private Point2D gravity = new Point2D.Double(0,9.81);
 
     public World(String name, int w, int h) {
         super(name);
@@ -17,12 +18,12 @@ public class World extends Entity {
         setPhysicType(PhysicType.STATIC);
     }
 
-    public World setGravity(double gravity) {
+    public World setGravity(Point2D gravity) {
         this.gravity = gravity;
         return this;
     }
 
-    public double getGravity() {
+    public Point2D  getGravity() {
         return this.gravity;
     }
 

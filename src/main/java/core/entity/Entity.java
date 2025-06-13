@@ -1,11 +1,12 @@
 package core.entity;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import core.physic.Material;
 import core.physic.PhysicType;
+import core.scene.Scene;
 
 
 public class Entity {
@@ -117,6 +118,46 @@ public class Entity {
     }
 
     public void draw(Graphics2D g) {
+
+    }
+
+    public void drawDebug(Scene scene, Graphics2D g, int debug) {
+        if (debug > 0) {
+            g.setColor(Color.ORANGE);
+            g.draw(new Rectangle2D.Double(position.getX(), position.getY(), width, height));
+            World world = scene.getWorld();
+            if (physicType != PhysicType.STATIC) {
+                // display velocity vector
+                g.setColor(Color.YELLOW);
+                g.drawRect((int) (position.getX() + width / 2), (int) (position.getY() + height / 2), 1, 1);
+                g.drawLine(
+                        (int) (position.getX() + width / 2), (int) (position.getY() + height / 2),
+                        (int) ((position.getX() + width / 2) + velocity.getY() * 100), (int) ((position.getY() + height / 2) + velocity.getY() * 100));
+                // display world gravity
+                g.setColor(Color.CYAN);
+                g.drawLine(
+                        (int) (position.getX() + width / 2), (int) (position.getY() + height / 2),
+                        (int) ((position.getX() + width / 2) + world.getGravity().getX() * 5),
+                        (int) ((position.getY() + height / 2) + world.getGravity().getY() * 5));
+            }
+            if (debug > 1) {
+                //getBehaviors().stream().forEach(b -> b.drawDebug(this, g));
+                if (debug > 2) {
+                    g.setColor(Color.ORANGE);
+                    g.setFont(g.getFont().deriveFont(Font.BOLD, 9f));
+                    g.drawString(this.getName(), (int) (position.getX() + width + 2), (int) (position.getY() + 9));
+                    if (debug > 3) {
+                        g.drawString("p(%3.2f,%3.2f)".formatted(position.getX(), position.getY()), (int) (position.getX() + width + 2), (int) (position.getY() + 18));
+                        g.drawString("v(%3.2f,%3.2f)".formatted(velocity.getX(), velocity.getY()), (int) (position.getX() + width + 2), (int) (position.getY() + 27));
+                        if (debug > 4) {
+                            //g.drawString("mass: %3.1f", mass), (int) (position.getX() + width + 2), (int) (position.getY() + 36));
+                            g.drawString("physicType: %s".formatted(physicType), (int) (position.getX() + width + 2), (int) (position.getY() + 45));
+                            g.drawString("material: %s".formatted(material.name()), (int) (position.getX() + width + 2), (int) (position.getY() + 54));
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
