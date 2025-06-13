@@ -50,13 +50,15 @@ public class Light extends Entity {
 
     @Override
     public void update(long elapsed) {
-        intensityDraw = (intensity * 0.9) + (Math.random() * 0.1);
+        if (vibration != -1) {
+            intensityDraw = (intensity * 0.9) + (Math.random() * 0.1);
+        }
     }
 
     @Override
     public void draw(Graphics2D g2d) {
-        float[] dist = { 0.0f, 0.3f, 0.8f };
-        Color[] colors = { getFillColor(), // centre lumineux, légèrement jaune
+        float[] dist = {0.0f, 0.3f, 0.8f};
+        Color[] colors = {getFillColor(), // centre lumineux, légèrement jaune
                 Utils.setAlpha(getFillColor(), (float) (intensityDraw)), // bord transparent
                 Utils.setAlpha(getFillColor(), (float) (intensityDraw * 0.2)), // bord transparent
         };
@@ -64,8 +66,9 @@ public class Light extends Entity {
         Composite oldComposite = g2d.getComposite();
         g2d.setPaint(paint);
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        g2d.fillOval((int) (position.getX() - radius + Math.random() * vibration),
-                (int) (position.getY() - radius + Math.random() * vibration), (int) radius * 2, (int) radius * 2);
+        double variance = (vibration != -1) ? vibration : 0.0;
+        g2d.fillOval((int) (position.getX() - radius + Math.random() * variance),
+                (int) (position.getY() - radius + Math.random() * variance), (int) radius * 2, (int) radius * 2);
         g2d.setComposite(oldComposite);
     }
 

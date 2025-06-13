@@ -29,12 +29,19 @@ public class Configuration {
     }
 
     public Configuration parseArgs(String[] args) {
-        log(App.class, LogLevel.INFO, "Parse command line arguments...");
+        log(App.class, LogLevel.INFO, "Parsing command line arguments...");
         for (String arg : args) {
-            String[] keyVal = arg.split("=");
-            attributes.setProperty(keyVal[0], keyVal[1]);
-            log(App.class, LogLevel.INFO, " |_ Override config:%s=%s", keyVal[0], keyVal[1]);
+            log(Configuration.class, LogLevel.INFO, "arg: '%s'", arg);
+            if (arg.contains("=")) {
+                String[] keyVal = arg.split("=");
+                attributes.setProperty(keyVal[0], keyVal[1]);
+                log(App.class, LogLevel.INFO, " |_ Override config:%s=%s", keyVal[0], keyVal[1]);
+            } else {
+                log(App.class, LogLevel.WARN, " |_ Warning: Unknown argument:%", arg);
+            }
         }
+        log(App.class, LogLevel.INFO, "Parsing done.");
+
         return this;
     }
 
@@ -42,17 +49,17 @@ public class Configuration {
         log(App.class, LogLevel.INFO, "Read configuration...");
         for (String key : attributes.stringPropertyNames()) {
             switch (key) {
-            case "app.debug", "debug", "d" -> {
-                app.debug = Integer.parseInt(attributes.getProperty(key, "0"));
-                log(App.class, LogLevel.INFO, "=> debug level overriden with arg %d", app.debug);
-            }
-            case "app.mode", "mode", "m" -> {
-                String mode = attributes.getProperty(key, "PROD");
-                app.mode = RunningMode.valueOf(mode);
-                log(App.class, LogLevel.INFO, "=> mode overriden with arg %s", app.mode);
-            }
-            default -> {
-            }
+                case "app.debug", "debug", "d" -> {
+                    app.debug = Integer.parseInt(attributes.getProperty(key, "0"));
+                    log(App.class, LogLevel.INFO, "=> debug level overriden with arg %d", app.debug);
+                }
+                case "app.mode", "mode", "m" -> {
+                    String mode = attributes.getProperty(key, "PROD");
+                    app.mode = RunningMode.valueOf(mode);
+                    log(App.class, LogLevel.INFO, "=> mode overriden with arg %s", app.mode);
+                }
+                default -> {
+                }
             }
 
         }
@@ -61,21 +68,21 @@ public class Configuration {
 
     private <T> T getConfig(String key, T defaultValue) {
         switch (key) {
-        case "app.debug", "debug", "d" -> {
-            return (T) Integer.valueOf(attributes.getProperty(key, "0"));
-        }
-        case "app.mode", "mode", "m" -> {
-            return (T) RunningMode.valueOf(attributes.getProperty(key, "PROD"));
-        }
-        case "app.window.size", "ws" -> {
-            String[] size = attributes.getProperty(key, "720x460").split("x");
-            return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
-        }
-        case "app.gfx.rendering.buffer.size", "rbs" -> {
-            String[] size = attributes.getProperty(key, "320x200").split("x");
-            return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
-        }
-        default -> log(App.class, LogLevel.WARN, "Unknown configuration key %s", key);
+            case "app.debug", "debug", "d" -> {
+                return (T) Integer.valueOf(attributes.getProperty(key, "0"));
+            }
+            case "app.mode", "mode", "m" -> {
+                return (T) RunningMode.valueOf(attributes.getProperty(key, "PROD"));
+            }
+            case "app.window.size", "ws" -> {
+                String[] size = attributes.getProperty(key, "720x460").split("x");
+                return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
+            }
+            case "app.gfx.rendering.buffer.size", "rbs" -> {
+                String[] size = attributes.getProperty(key, "320x200").split("x");
+                return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
+            }
+            default -> log(App.class, LogLevel.WARN, "Unknown configuration key %s", key);
         }
         return null;
     }

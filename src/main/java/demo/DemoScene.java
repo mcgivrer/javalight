@@ -44,14 +44,17 @@ public class DemoScene extends AbstractScene implements Scene {
         addLight(new Light("light-sun").setLightType(LightType.POINT).setIntensity(0.3).setRadius(120)
                 .setPosition((world.getWidth()) / 5, (world.getHeight() - 40) / 6)
                 .setFillColor(new Color(0, 255, 230)));
-        addLight(new Light("light-directional").setLightType(LightType.DIRECTIONAL).setIntensity(0.3)
+        addLight(new Light("light-directional")
+                .setLightType(LightType.DIRECTIONAL)
+                .setIntensity(0.3)
+                .setVibration(-1)
                 .setSize(80, world.getHeight()).setPosition((world.getWidth()) * 2 / 5, 0)
                 .setFillColor(new Color(255, 255, 230)));
         addLight(new Light("light-spot").setLightType(LightType.SPOT).setIntensity(0.6).setRadius(80)
                 .setDirection(-Math.PI / 4.0).setPosition(world.getWidth(), world.getHeight())
                 .setSize(50, world.getHeight()).setFillColor(new Color(255, 255, 250)));
         addLight(new Light("light-area").setLightType(LightType.AREA).setIntensity(0.3).setPosition(0, 0)
-                .setSize(world.getWidth(), world.getHeight()).setFillColor(new Color(255, 100, 30)));
+                .setSize(world.getWidth()/2, world.getHeight()).setFillColor(new Color(255, 100, 30)));
 
         setActiveCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
     }
@@ -60,9 +63,9 @@ public class DemoScene extends AbstractScene implements Scene {
     public void input(App app) {
         Entity player = getEntity("player");
         if (player != null) {
-            double step = 0.05;
+            double step = 0.1;
             if (isKeyPressed(KeyEvent.VK_UP)) {
-                player.setVelocity(player.getVelocity().getX(), -step * 6);
+                player.setVelocity(player.getVelocity().getX(), -step * 5);
             }
             if (isKeyPressed(KeyEvent.VK_DOWN)) {
                 player.setVelocity(player.getVelocity().getX(), +step);

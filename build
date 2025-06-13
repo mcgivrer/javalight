@@ -45,7 +45,7 @@ do
       ;;
     r | run | execute)
       echo "run ..."
-      java -jar target/build/${project_name}-${main_class}-${project_version}.jar -cp target/build/libs/* ${main_class}
+      java -cp target/build/libs/* -jar target/build/${project_name}-${main_class}-${project_version}.jar
       ;;
     b | build)
       echo "build ..."
