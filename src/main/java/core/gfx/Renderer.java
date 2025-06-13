@@ -57,7 +57,7 @@ public class Renderer {
                 System.exit(0);
             }
         });
-        window.addKeyListener(app);
+        window.addKeyListener(app.getInputHandler());
         window.pack();
         window.setBackground(Color.BLACK);
         window.setVisible(true);

@@ -1,5 +1,7 @@
 package demo;
 
+import static core.io.InputHandler.*;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.Random;
@@ -57,18 +59,20 @@ public class DemoScene extends AbstractScene implements Scene {
     @Override
     public void input(App app) {
         Entity player = getEntity("player");
-        double step = 0.1;
-        if (app.isKeyPressed(KeyEvent.VK_UP)) {
-            player.setVelocity(player.getVelocity().getX(), -step * 6);
-        }
-        if (app.isKeyPressed(KeyEvent.VK_DOWN)) {
-            player.setVelocity(player.getVelocity().getX(), +step);
-        }
-        if (app.isKeyPressed(KeyEvent.VK_LEFT)) {
-            player.setVelocity(-step, player.getVelocity().getY());
-        }
-        if (app.isKeyPressed(KeyEvent.VK_RIGHT)) {
-            player.setVelocity(+step, player.getVelocity().getY());
+        if (player != null) {
+            double step = 0.05;
+            if (isKeyPressed(KeyEvent.VK_UP)) {
+                player.setVelocity(player.getVelocity().getX(), -step * 6);
+            }
+            if (isKeyPressed(KeyEvent.VK_DOWN)) {
+                player.setVelocity(player.getVelocity().getX(), +step);
+            }
+            if (isKeyPressed(KeyEvent.VK_LEFT)) {
+                player.setVelocity(-step, player.getVelocity().getY());
+            }
+            if (isKeyPressed(KeyEvent.VK_RIGHT)) {
+                player.setVelocity(+step, player.getVelocity().getY());
+            }
         }
     }
 

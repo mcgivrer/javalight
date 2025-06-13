@@ -1,6 +1,5 @@
 package core;
 
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -10,12 +9,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import core.gfx.Renderer;
+import core.io.InputHandler;
 import core.physic.PhysicSystem;
 import core.scene.Scene;
 import core.utils.Configuration;
 import demo.DemoScene;
 
-public class App implements KeyListener {
+public class App {
 
     public enum RunningMode {
         DEV, TEST, PROD;
@@ -28,7 +28,6 @@ public class App implements KeyListener {
     public static final ResourceBundle messages = ResourceBundle.getBundle("i18n/messages");
     public static Configuration config;
     private static final long FPS = 60;
-    private boolean[] keys = new boolean[1024];
 
     public int debug = 0;
     public RunningMode mode = RunningMode.PROD;
@@ -42,13 +41,11 @@ public class App implements KeyListener {
 
     private Renderer renderer;
     private PhysicSystem physicSystem;
+    private InputHandler inputHandler;
 
     public App() {
-            log(App.class, 
-            LogLevel.INFO, 
-            "Welcome to %s (%s) !", 
-            messages.getString("app.name"),
-            messages.getString("app.version"));
+        log(App.class, LogLevel.INFO, "Welcome to %s (%s) !", messages.getString("app.name"),
+                messages.getString("app.version"));
         initialize("/config.properties");
     }
 
@@ -59,10 +56,14 @@ public class App implements KeyListener {
     }
 
     public void run(String[] args) {
-        
+
         config.parseArgs(args).extractConfigValues();
+
+        inputHandler = new InputHandler(this);
+
         renderer = new Renderer(this);
         renderer.prepareWindow();
+
         physicSystem = new PhysicSystem(this);
 
         log(App.class, LogLevel.INFO, "RUN !");
@@ -111,37 +112,6 @@ public class App implements KeyListener {
         app.run(args);
     }
 
-    public void keyTyped(KeyEvent e) {
-    }
-
-    public void keyPressed(KeyEvent e) {
-        keys[e.getKeyCode()] = true;
-    }
-
-    public void keyReleased(KeyEvent e) {
-        keys[e.getKeyCode()] = false;
-        switch (e.getKeyCode()) {
-        case KeyEvent.VK_ESCAPE -> {
-            exit = true;
-        }
-        case KeyEvent.VK_D -> {
-            if (e.isControlDown()) {
-                debug = (debug + 1) % 5;
-            }
-        }
-        case KeyEvent.VK_PAUSE, KeyEvent.VK_P -> {
-            pause = !pause;
-        }
-        default -> {
-            // nothing to do in that case
-        }
-        }
-    }
-
-    public boolean isKeyPressed(int keyCode) {
-        return this.keys[keyCode];
-    }
-
     public void setExit(boolean b) {
         exit = b;
     }
@@ -153,7 +123,7 @@ public class App implements KeyListener {
     public static void log(Class<?> clazz, LogLevel ll, String message, Object... args) {
         String timestamp = ZonedDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         String formattedMsg = args != null && args.length > 0 ? String.format(message, args) : message;
-        String output = String.format("%s;%s;%s;%s", timestamp, ll, clazz, formattedMsg);
+        String output = String.format("%s;%s;%s;%s", timestamp, ll, clazz.getName(), formattedMsg);
         if (ll == LogLevel.ERROR) {
             System.err.println(output);
         } else {
@@ -163,6 +133,26 @@ public class App implements KeyListener {
 
     public Configuration getConfiguration() {
         return config;
+    }
+
+    public int getDebug() {
+        return debug;
+    }
+
+    public void setDebug(int db) {
+        debug = db;
+    }
+
+    public boolean isPause() {
+        return pause;
+    }
+
+    public void setPause(boolean pb) {
+        pause = pb;
+    }
+
+    public KeyListener getInputHandler() {
+        return inputHandler;
     }
 
 }
