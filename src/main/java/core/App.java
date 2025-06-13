@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import core.entity.Entity;
-import core.entity.World;
 import core.gfx.Renderer;
-import core.physic.PhysicType;
+import core.physic.PhysicSystem;
 import core.scene.Scene;
 import demo.DemoScene;
 
@@ -38,12 +36,13 @@ public class App implements KeyListener {
 
     private boolean exit = false;
     public boolean pause = false;
-    private long time = 0;
+    public long time = 0;
 
     private List<Scene> scenes = new ArrayList<>();
     private Scene currentScene;
 
     private Renderer renderer;
+    private PhysicSystem physicSystem;
 
     public App() {
         log(App.class, LogLevel.INFO, "Welcome to %s (%s) !", messages.getString("app.name"),
@@ -67,6 +66,7 @@ public class App implements KeyListener {
 
         renderer = new Renderer(this);
         renderer.prepareWindow();
+        physicSystem = new PhysicSystem(this);
 
         log(App.class, LogLevel.INFO, "RUN !");
         loop();
@@ -146,52 +146,8 @@ public class App implements KeyListener {
 
     private void update(long elapsed) {
 
-        time += elapsed;
-
         currentScene.input(this);
-        currentScene.getEntities().stream().filter(Entity::isActive).forEach(e -> {
-            updateEntity(e, elapsed);
-            e.update(elapsed);
-            constrainsEntity(currentScene.getWorld(), e);
-        });
-        currentScene.getLights().stream().filter(Entity::isActive).forEach(e -> {
-            updateEntity(e, elapsed);
-            e.update(elapsed);
-            constrainsEntity(currentScene.getWorld(), e);
-        });
-        if (currentScene.getActiveCamera() != null) {
-            currentScene.getActiveCamera().update(elapsed);
-        }
-        currentScene.update(null, elapsed);
-    }
-
-    public void updateEntity(Entity e, long elapsed) {
-        if (e.getPhysicType().equals(PhysicType.DYNAMIC)) {
-            e.setPosition((e.getPosition().getX() + (e.getVelocity().getX() * elapsed)), (e.getPosition().getY()
-                    + ((e.getVelocity().getY() + (currentScene.getWorld().getGravity() * 0.01)) * elapsed)));
-            // reduce velocity
-            e.setVelocity((e.getVelocity().getX() * e.getMaterial().friction()),
-                    (e.getVelocity().getY() * e.getMaterial().friction()));
-        }
-    }
-
-    public void constrainsEntity(World w, Entity e) {
-        if (e.getPosition().getX() < w.getPosition().getX()) {
-            e.setPosition(w.getPosition().getX(), e.getPosition().getY());
-            e.setVelocity(-(e.getVelocity().getX() * e.getMaterial().elasticity()), e.getVelocity().getY());
-        } else if (e.getPosition().getX() + e.getWidth() > w.getPosition().getX() + w.getWidth()) {
-            e.setPosition(w.getPosition().getX() + w.getWidth() - e.getWidth(), e.getPosition().getY());
-            e.setVelocity(-(e.getVelocity().getX() * e.getMaterial().elasticity()), e.getVelocity().getY());
-        }
-
-        if (e.getPosition().getY() < w.getPosition().getY()) {
-            e.setPosition(e.getPosition().getX(), w.getPosition().getY());
-            e.setVelocity(e.getVelocity().getX(), -e.getVelocity().getY() * e.getMaterial().elasticity());
-        } else if (e.getPosition().getY() + e.getHeight() > w.getPosition().getY() + w.getHeight()) {
-            e.setPosition(e.getPosition().getX(), w.getPosition().getY() + w.getHeight() - e.getHeight());
-            e.setVelocity(e.getVelocity().getX(), -e.getVelocity().getY() * e.getMaterial().elasticity());
-        }
-
+        physicSystem.update(currentScene, elapsed);
     }
 
     private void render() {
