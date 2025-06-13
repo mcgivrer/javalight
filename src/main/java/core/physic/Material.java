@@ -1,3 +1,5 @@
+package core.physic;
+
 public record Material(String name, double friction, double elasticity, double density) {
     public static Material WOOD = new Material("Wood", 0.5, 0.3, 0.6);
     public static Material STEEL = new Material("Steel", 0.8, 0.1, 7.8);

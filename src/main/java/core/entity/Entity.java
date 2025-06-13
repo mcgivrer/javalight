@@ -1,5 +1,11 @@
-import java.awt.*;
+package core.entity;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+
+import core.physic.Material;
+import core.physic.PhysicType;
 
 
 public class Entity {

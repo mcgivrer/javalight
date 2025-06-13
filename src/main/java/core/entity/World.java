@@ -1,4 +1,9 @@
-import java.awt.*;
+package core.entity;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+
+import core.physic.PhysicType;
 
 public class World extends Entity {
     private double gravity = 9.81f;

@@ -1,4 +1,7 @@
-import java.awt.*;
+package core.entity;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
 
 public class Camera extends Entity {
     private Entity target;

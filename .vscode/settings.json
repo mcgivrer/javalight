@@ -6,5 +6,6 @@
         "src/test/java",
         "src/test/resources"
     ],
-    "java.project.outputPath": "target/classes"
+    "java.project.outputPath": "target/classes",
+    "java.debug.settings.onBuildFailureProceed": true
 }
