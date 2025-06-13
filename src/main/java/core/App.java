@@ -1,6 +1,5 @@
 package core;
 
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.ZoneId;
@@ -8,12 +7,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 import core.gfx.Renderer;
 import core.physic.PhysicSystem;
 import core.scene.Scene;
+import core.utils.Configuration;
 import demo.DemoScene;
 
 public class App implements KeyListener {
@@ -27,7 +26,7 @@ public class App implements KeyListener {
     }
 
     public static final ResourceBundle messages = ResourceBundle.getBundle("i18n/messages");
-    public static Properties config = new Properties();
+    public static Configuration config;
     private static final long FPS = 60;
     private boolean[] keys = new boolean[1024];
 
@@ -45,25 +44,23 @@ public class App implements KeyListener {
     private PhysicSystem physicSystem;
 
     public App() {
-        log(App.class, LogLevel.INFO, "Welcome to %s (%s) !", messages.getString("app.name"),
-                messages.getString("app.version"));
+            log(App.class, 
+            LogLevel.INFO, 
+            "Welcome to %s (%s) !", 
+            messages.getString("app.name"),
+            messages.getString("app.version"));
+        initialize("/config.properties");
     }
 
-    public void initConfig(String configFilePath) {
-        try {
-            config.load(this.getClass().getResourceAsStream(configFilePath));
-        } catch (Exception e) {
-            log(App.class, LogLevel.ERROR, "Unable to read configuration file %s: %s", configFilePath, e.getMessage());
-        }
+    public void initialize(String configFilePath) {
+        config = new Configuration(this).load(configFilePath).extractConfigValues();
         scenes.add(new DemoScene());
         currentScene = scenes.get(0);
     }
 
     public void run(String[] args) {
-        initConfig("/config.properties");
-        parseArgs(args);
-        extractConfigValues();
-
+        
+        config.parseArgs(args).extractConfigValues();
         renderer = new Renderer(this);
         renderer.prepareWindow();
         physicSystem = new PhysicSystem(this);
@@ -73,60 +70,12 @@ public class App implements KeyListener {
         dispose();
     }
 
-    public void parseArgs(String[] args) {
-        log(App.class, LogLevel.INFO, "Parse command line arguments...");
-        for (String arg : args) {
-            String[] keyVal = arg.split("=");
-            config.setProperty(keyVal[0], keyVal[1]);
-            log(App.class, LogLevel.INFO, " |_ Override config:%s=%s", keyVal[0], keyVal[1]);
-        }
-    }
-
-    private void extractConfigValues() {
-        log(App.class, LogLevel.INFO, "Read configuration...");
-        for (String key : config.stringPropertyNames()) {
-            switch (key) {
-            case "app.debug", "debug", "d" -> {
-                debug = Integer.parseInt(config.getProperty(key, "0"));
-                log(App.class, LogLevel.INFO, "=> debug level set to %d", debug);
-            }
-            case "app.mode", "mode", "m" -> {
-                mode = RunningMode.valueOf(config.getProperty(key, "PROD"));
-            }
-            default -> {
-            }
-            }
-        }
-    }
-
-    public <T> T getConfig(String key, T defaultValue) {
-        switch (key) {
-        case "app.debug", "debug", "d" -> {
-            return (T) Integer.valueOf(config.getProperty(key, "0"));
-        }
-        case "app.mode", "mode", "m" -> {
-            return (T) RunningMode.valueOf(config.getProperty(key, "PROD"));
-        }
-        case "app.window.size", "ws" -> {
-            String[] size = config.getProperty(key, "720x460").split("x");
-            return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
-        }
-        case "app.gfx.rendering.buffer.size", "rbs" -> {
-            String[] size = config.getProperty(key, "320x200").split("x");
-            return (T) new Dimension(Integer.parseInt(size[0]), Integer.parseInt(size[1]));
-        }
-        default -> log(App.class, LogLevel.WARN, "Unknown configuration key %s", key);
-        }
-        return null;
-    }
-
     private void loop() {
         long startTime = 0, endTime = 0, elapsed = 0;
         currentScene.initialize(this);
         currentScene.create(this);
         endTime = System.currentTimeMillis();
         do {
-
             startTime = endTime;
             if (!pause) {
                 update(elapsed);
@@ -137,7 +86,6 @@ public class App implements KeyListener {
             } catch (Exception e) {
                 // something goes wrong in the matrix
             }
-
             endTime = System.currentTimeMillis();
             elapsed = endTime - startTime;
 
@@ -205,12 +153,16 @@ public class App implements KeyListener {
     public static void log(Class<?> clazz, LogLevel ll, String message, Object... args) {
         String timestamp = ZonedDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         String formattedMsg = args != null && args.length > 0 ? String.format(message, args) : message;
-        String output = String.format("[%s] [%s] [%s] %s", timestamp, ll, clazz.getSimpleName(), formattedMsg);
+        String output = String.format("%s;%s;%s;%s", timestamp, ll, clazz, formattedMsg);
         if (ll == LogLevel.ERROR) {
             System.err.println(output);
         } else {
             System.out.println(output);
         }
+    }
+
+    public Configuration getConfiguration() {
+        return config;
     }
 
 }

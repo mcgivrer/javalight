@@ -21,11 +21,11 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 import core.App;
-import core.Utils;
 import core.entity.Entity;
 import core.entity.Light;
 import core.entity.LightType;
 import core.scene.Scene;
+import core.utils.Utils;
 
 public class Renderer {
 
@@ -36,13 +36,13 @@ public class Renderer {
 
     public Renderer(App app) {
         this.app = app;
-        Dimension bufferSize = app.getConfig("app.gfx.rendering.buffer.size", new Dimension(320, 200));
+        Dimension bufferSize = app.getConfiguration().get("app.gfx.rendering.buffer.size", new Dimension(320, 200));
         renderBuffer = new BufferedImage(bufferSize.width, bufferSize.height, BufferedImage.TYPE_INT_ARGB);
     }
 
     public void prepareWindow() {
         window = new JFrame(App.messages.getString("app.name"));
-        window.setPreferredSize(app.getConfig("app.window.size", new Dimension(640, 400)));
+        window.setPreferredSize(app.getConfiguration().get("app.window.size", new Dimension(640, 400)));
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.addComponentListener(new ComponentAdapter() {
             @Override

@@ -6,8 +6,8 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 
-import core.Utils;
 import core.physic.PhysicType;
+import core.utils.Utils;
 
 public class Light extends Entity {
     private LightType lightType;
