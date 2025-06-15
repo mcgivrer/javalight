@@ -36,8 +36,6 @@ public interface Scene {
 
     List<Entity> getEntities();
 
-    List<Light> getLights();
-
     <T extends Entity> T getEntity(String string);
 
     World getWorld();

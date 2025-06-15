@@ -1,7 +1,6 @@
 package core.entity;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class Camera extends Entity {
     private Entity target;
@@ -19,8 +18,13 @@ public class Camera extends Entity {
 
     @Override
     public void draw(Graphics2D g) {
-        g.setColor(Color.GREEN.darker());
+        Stroke st = g.getStroke();
+        g.setStroke(new BasicStroke(0.5f));
+        g.setColor(Color.ORANGE.darker());
         g.drawRect((int) position.getX() + 20, (int) position.getY() + 20, (int) width - 40, (int) height - 40);
+        g.setFont(g.getFont().deriveFont(Font.BOLD, 8f));
+        g.drawString(getName(), (int) position.getX() + 20, (int) (position.getY() + height - 20));
+        g.setStroke(st);
     }
 
     @Override

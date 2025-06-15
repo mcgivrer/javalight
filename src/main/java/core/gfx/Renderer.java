@@ -1,10 +1,7 @@
 package core.gfx;
 
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -52,6 +49,8 @@ public class Renderer {
             }
         });
         window.addKeyListener(app.getInputHandler());
+        window.addMouseListener((MouseListener) app.getInputHandler());
+        window.addMouseMotionListener((MouseMotionListener) app.getInputHandler());
         window.pack();
         window.setBackground(Color.BLACK);
         window.setVisible(true);
@@ -70,30 +69,41 @@ public class Renderer {
                 RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED));
 
         // draw all entities.
-        scene.getEntities().stream().filter(Entity::isActive).forEach(e -> {
-            if (scene.getActiveCamera() != null) {
-                g.translate(-scene.getActiveCamera().getPosition().getX(),
-                        -scene.getActiveCamera().getPosition().getY());
-            }
+        scene.getEntities().stream()
+                .filter(e -> e.isActive() && !(e instanceof Light l))
+                .forEach(e -> {
+                    if (scene.getActiveCamera() != null) {
+                        g.translate(-scene.getActiveCamera().getPosition().getX(),
+                                -scene.getActiveCamera().getPosition().getY());
+                    }
 
-            drawEntity(g, e);
-            e.draw(g);
-            if (scene.getActiveCamera() != null) {
-                g.translate(scene.getActiveCamera().getPosition().getX(), scene.getActiveCamera().getPosition().getY());
-            }
-        });
-
+                    drawEntity(g, e);
+                    e.draw(g);
+                    if (scene.getActiveCamera() != null) {
+                        g.translate(scene.getActiveCamera().getPosition().getX(), scene.getActiveCamera().getPosition().getY());
+                    }
+                });
+        if (scene.getActiveCamera() != null) {
+            g.translate(-scene.getActiveCamera().getPosition().getX(),
+                    -scene.getActiveCamera().getPosition().getY());
+        }
+        scene.getActiveCamera().draw(g);
+        if (scene.getActiveCamera() != null) {
+            g.translate(scene.getActiveCamera().getPosition().getX(), scene.getActiveCamera().getPosition().getY());
+        }
         // rendering lights
-        scene.getLights().stream().filter(Entity::isActive).forEach(l -> {
-            if (scene.getActiveCamera() != null) {
-                g.translate(-scene.getActiveCamera().getPosition().getX(),
-                        -scene.getActiveCamera().getPosition().getY());
-            }
-            drawLight(g, l);
-            if (scene.getActiveCamera() != null) {
-                g.translate(scene.getActiveCamera().getPosition().getX(), scene.getActiveCamera().getPosition().getY());
-            }
-        });
+        scene.getEntities().stream()
+                .filter(e -> e.isActive() && e instanceof Light l)
+                .forEach(l -> {
+                    if (scene.getActiveCamera() != null) {
+                        g.translate(-scene.getActiveCamera().getPosition().getX(),
+                                -scene.getActiveCamera().getPosition().getY());
+                    }
+                    drawLight(g, (Light) l);
+                    if (scene.getActiveCamera() != null) {
+                        g.translate(scene.getActiveCamera().getPosition().getX(), scene.getActiveCamera().getPosition().getY());
+                    }
+                });
 
         g.dispose();
         drawToWindow(scene);
@@ -229,5 +239,13 @@ public class Renderer {
 
     public void setDisplayHelp(boolean b) {
         this.displayHelp = b;
+    }
+
+    public BufferedImage getRenderBuffer() {
+        return renderBuffer;
+    }
+
+    public Window getWindow() {
+        return window;
     }
 }

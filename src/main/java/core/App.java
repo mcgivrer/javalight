@@ -94,7 +94,6 @@ public class App {
     }
 
     private void update(long elapsed) {
-
         currentScene.input(this);
         physicSystem.update(currentScene, elapsed);
     }

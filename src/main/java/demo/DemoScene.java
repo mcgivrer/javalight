@@ -8,10 +8,8 @@ import java.awt.geom.Point2D;
 import java.util.Random;
 
 import core.App;
-import core.entity.Camera;
-import core.entity.Entity;
-import core.entity.Light;
-import core.entity.LightType;
+import core.entity.*;
+import core.gfx.Renderer;
 import core.physic.Material;
 import core.scene.AbstractScene;
 import core.scene.Scene;
@@ -31,35 +29,47 @@ public class DemoScene extends AbstractScene implements Scene {
 
     @Override
     public void create(App app) {
-        addEntity(world);
-        Entity player = new Entity("player").setPosition(20, 20).setSize(16, 16).setEdgeColor(Color.RED)
-                .setFillColor(Color.RED.darker()).setMaterial(new Material("body", 0.92, 0.98, 1.0));
-        addEntity(player);
+        add(world);
         Random rand = new Random(1234);
         for (int i = 0; i < 20; i++) {
-            addEntity(new Entity("enemy_%d".formatted(i))
-                    .setPosition(rand.nextDouble(world.getWidth()), rand.nextDouble(world.getHeight())).setSize(8, 8)
+            add(new Entity("enemy_%d".formatted(i))
+                    .setPosition(rand.nextDouble(world.getWidth()), rand.nextDouble(world.getHeight())).setSize(16, 16)
                     .setEdgeColor(Color.ORANGE).setFillColor(Color.ORANGE.darker())
                     .setMaterial(new Material("enemy", 1.0, 1.0, 1.0))
                     .setVelocity(-0.2 + rand.nextDouble(0.4), -0.2 + rand.nextDouble(0.4)));
         }
 
-        addLight(new Light("light-sun").setLightType(LightType.POINT).setIntensity(0.3).setRadius(120)
+        add(new Light("light-sun").setLightType(LightType.POINT).setIntensity(0.3).setRadius(120)
                 .setPosition((world.getWidth()) / 5, (world.getHeight() - 40) / 6)
                 .setFillColor(new Color(0, 255, 230)));
-        addLight(new Light("light-directional")
+        add(new Light("light-directional")
                 .setLightType(LightType.DIRECTIONAL)
                 .setIntensity(0.3)
                 .setVibration(-1)
                 .setSize(80, world.getHeight()).setPosition((world.getWidth()) * 2 / 5, 0)
                 .setFillColor(new Color(255, 255, 230)));
-        addLight(new Light("light-spot").setLightType(LightType.SPOT).setIntensity(0.6).setRadius(80)
+        add(new Light("light-spot").setLightType(LightType.SPOT).setIntensity(0.6).setRadius(80)
                 .setDirection(-Math.PI / 4.0).setPosition(world.getWidth(), world.getHeight())
                 .setSize(50, world.getHeight()).setFillColor(new Color(255, 255, 250)));
-        addLight(new Light("light-area").setLightType(LightType.AREA).setIntensity(0.3).setPosition(0, 0)
+        add(new Light("light-area").setLightType(LightType.AREA).setIntensity(0.3).setPosition(0, 0)
                 .setSize(world.getWidth() / 2, world.getHeight()).setFillColor(new Color(255, 100, 30)));
 
-        setActiveCamera(new Camera("cam01").setTarget(player).setSize(320, 200));
+        add(new Entity("ground").setPosition(0, world.getHeight() - 1).setSize(world.getWidth(), 1).setEdgeColor(Color.GRAY));
+        add(new Entity("wall-left").setPosition(0, 0).setSize(1, world.getHeight()).setEdgeColor(Color.GRAY));
+        add(new Entity("wall-right").setPosition(world.getWidth() - 1, 0).setSize(1, world.getHeight()).setEdgeColor(Color.GRAY));
+        add(new Entity("wall-top").setPosition(0, world.getHeight() - 1).setSize(world.getWidth(), 1).setEdgeColor(Color.GRAY));
+
+        Entity player = new Entity("player").setPosition(20, 20).setSize(24, 32).setEdgeColor(Color.RED)
+                .setFillColor(Color.RED.darker()).setMaterial(new Material("body", 0.92, 0.98, 1.0));
+        add(player);
+
+        Renderer r = app.getRenderer();
+        setActiveCamera(new Camera("cam01")
+                .setTarget(player)
+                .setSize(r.getRenderBuffer().getWidth(), r.getRenderBuffer().getHeight()));
+
+        add(new MouseCursor("mouse-cursor").setPosition(world.getWidth() / 2, world.getHeight() / 2));
+
     }
 
     @Override

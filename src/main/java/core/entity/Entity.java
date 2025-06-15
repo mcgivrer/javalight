@@ -6,12 +6,15 @@ import java.awt.geom.Rectangle2D;
 
 import core.physic.Material;
 import core.physic.PhysicType;
+import core.scene.AbstractScene;
 import core.scene.Scene;
 
 
 public class Entity {
     private static long index = 0;
     protected long id = index++;
+
+    protected Scene scene;
 
     protected String name = "entity_%d".formatted(id);
 
@@ -167,5 +170,14 @@ public class Entity {
 
     public Material getMaterial() {
         return material;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    public <T extends Entity> T setScene(Scene scene) {
+        this.scene = scene;
+        return (T) this;
     }
 }

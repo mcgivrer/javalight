@@ -22,11 +22,6 @@ public class PhysicSystem {
             e.update(elapsed);
             constrainsEntity(scene.getWorld(), e);
         });
-        scene.getLights().stream().filter(Entity::isActive).forEach(e -> {
-            updateEntity(scene, e, elapsed);
-            e.update(elapsed);
-            constrainsEntity(scene.getWorld(), e);
-        });
         if (scene.getActiveCamera() != null) {
             scene.getActiveCamera().update(elapsed);
         }

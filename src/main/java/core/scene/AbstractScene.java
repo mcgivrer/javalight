@@ -11,27 +11,20 @@ import core.entity.World;
 public class AbstractScene {
 
     protected final List<Entity> entities = new ArrayList<>();
-    protected final List<Light> lights = new ArrayList<>();
 
     protected List<Camera> cameras = new ArrayList<>();
     protected Camera activeCamera;
 
     protected World world = new World("earth", 320, 200);
 
-    public void addLight(Light light) {
-        lights.add(light);
-    }
 
-    public void addEntity(Entity e) {
+    public void add(Entity e) {
+        e.setScene((Scene) this);
         entities.add(e);
     }
 
     public List<Entity> getEntities() {
         return entities;
-    }
-
-    public List<Light> getLights() {
-        return lights;
     }
 
     public void setActiveCamera(Camera camera) {
